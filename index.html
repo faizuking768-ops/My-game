@@ -1,151 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Crash Game Pro</title>
+<title>Aviator Style Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin: 0;
-  background: #0f172a;
+  background: #0b0f1a;
   color: white;
   font-family: Arial;
   text-align: center;
 }
 
-h2 { margin-top: 10px; }
+.container {
+  max-width: 400px;
+  margin: auto;
+  padding: 10px;
+}
 
 canvas {
-  background: #020617;
-  border: 2px solid #1e293b;
-  margin-top: 10px;
-  width: 95%;
-  max-width: 400px;
+  width: 100%;
+  background: black;
+  border-radius: 10px;
 }
 
-button {
-  padding: 10px 20px;
-  margin: 8px;
-  font-size: 16px;
-  border: none;
+input, button {
+  padding: 10px;
+  margin: 5px;
   border-radius: 8px;
-  cursor: pointer;
+  border: none;
 }
 
-#start { background: green; color: white; }
-#cash { background: orange; color: white; }
-#coinBtn { background: blue; color: white; }
-
-#coins {
-  font-size: 18px;
-  margin-top: 5px;
-}
+#start { background: green; }
+#cash { background: orange; }
 
 </style>
 </head>
 
 <body>
 
-<h2>✈️ Crash Game</h2>
+<div class="container">
 
-<div id="coins">Coins: 100</div>
+<h2>✈️ Aviator Game</h2>
+
+<input id="bet" placeholder="Enter Bet">
 
 <canvas id="graph" height="250"></canvas>
 
 <h1 id="multi">1.00x</h1>
 
-<button id="start" onclick="startGame()">Start</button>
+<button id="start" onclick="startGame()">Bet</button>
 <button id="cash" onclick="cashOut()">Cash Out</button>
-<br>
-<button id="coinBtn" onclick="getCoins()">+50 Coins (Ad)</button>
 
 <h3 id="result"></h3>
+
+</div>
+
+<audio id="flySound" src="https://www.soundjay.com/transportation/airplane-takeoff-01.mp3"></audio>
+<audio id="crashSound" src="https://www.soundjay.com/explosion/explosion-01.wav"></audio>
 
 <script>
 let canvas = document.getElementById("graph");
 let ctx = canvas.getContext("2d");
 
-let x = 0;
-let y = canvas.height;
-let multiplier = 1;
-let running = false;
-let interval;
-let coins = 100;
+let x,y,multiplier,running,interval,bet;
 
-function updateCoins(){
-  document.getElementById("coins").innerText = "Coins: " + coins;
-}
+function startGame(){
+  bet=parseInt(document.getElementById("bet").value);
+  if(running || bet<=0) return;
 
-function drawLine() {
-  ctx.lineTo(x, y);
-  ctx.strokeStyle = "lime";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
+  document.getElementById("flySound").play();
 
-function startGame() {
-  if (running || coins < 10) return;
-
-  coins -= 10;
-  updateCoins();
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.beginPath();
 
-  x = 0;
-  y = canvas.height;
-  multiplier = 1;
-  running = true;
+  x=0;
+  y=canvas.height;
+  multiplier=1;
+  running=true;
 
-  document.getElementById("result").innerText = "";
+  interval=setInterval(()=>{
+    x+=3;
+    y-=Math.random()*2;
+    multiplier+=0.03;
 
-  interval = setInterval(() => {
-    x += 2;
-    y -= Math.random() * 2;
+    document.getElementById("multi").innerText=multiplier.toFixed(2)+"x";
 
-    multiplier += 0.02;
+    ctx.lineTo(x,y);
+    ctx.strokeStyle="red";
+    ctx.lineWidth=2;
+    ctx.stroke();
 
-    document.getElementById("multi").innerText =
-      multiplier.toFixed(2) + "x";
+    ctx.fillStyle="yellow";
+    ctx.fillText("✈️",x,y);
 
-    drawLine();
-
-    ctx.font = "20px Arial";
-    ctx.fillText("✈️", x, y);
-
-    if (Math.random() < 0.02 || x > canvas.width) {
+    if(Math.random()<0.02){
       crash();
     }
 
-  }, 50);
+  },50);
 }
 
-function crash() {
+function crash(){
   clearInterval(interval);
-  running = false;
-  document.getElementById("result").innerText = "💥 Crash!";
+  running=false;
+  document.getElementById("crashSound").play();
+  document.getElementById("result").innerText="💥 Crashed!";
 }
 
-function cashOut() {
-  if (!running) return;
+function cashOut(){
+  if(!running) return;
 
   clearInterval(interval);
-  running = false;
+  running=false;
 
-  let win = Math.floor(multiplier * 10);
-  coins += win;
+  let win=Math.floor(bet*multiplier);
 
-  updateCoins();
-
-  document.getElementById("result").innerText =
-    "✅ Cashed Out at " + multiplier.toFixed(2) + "x | +" + win;
-}
-
-function getCoins(){
-  // future mein yahan real ad lag sakta hai
-  coins += 50;
-  updateCoins();
-  alert("Ad dekha! +50 Coins");
+  document.getElementById("result").innerText="Won: "+win;
 }
 </script>
 
