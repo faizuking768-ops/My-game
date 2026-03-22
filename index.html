@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Crash Game Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #0f172a;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+}
+
+h2 { margin-top: 10px; }
+
+canvas {
+  background: #020617;
+  border: 2px solid #1e293b;
+  margin-top: 10px;
+  width: 95%;
+  max-width: 400px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 8px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#start { background: green; color: white; }
+#cash { background: orange; color: white; }
+#coinBtn { background: blue; color: white; }
+
+#coins {
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>✈️ Crash Game</h2>
+
+<div id="coins">Coins: 100</div>
+
+<canvas id="graph" height="250"></canvas>
+
+<h1 id="multi">1.00x</h1>
+
+<button id="start" onclick="startGame()">Start</button>
+<button id="cash" onclick="cashOut()">Cash Out</button>
+<br>
+<button id="coinBtn" onclick="getCoins()">+50 Coins (Ad)</button>
+
+<h3 id="result"></h3>
+
+<script>
+let canvas = document.getElementById("graph");
+let ctx = canvas.getContext("2d");
+
+let x = 0;
+let y = canvas.height;
+let multiplier = 1;
+let running = false;
+let interval;
+let coins = 100;
+
+function updateCoins(){
+  document.getElementById("coins").innerText = "Coins: " + coins;
+}
+
+function drawLine() {
+  ctx.lineTo(x, y);
+  ctx.strokeStyle = "lime";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function startGame() {
+  if (running || coins < 10) return;
+
+  coins -= 10;
+  updateCoins();
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.beginPath();
+
+  x = 0;
+  y = canvas.height;
+  multiplier = 1;
+  running = true;
+
+  document.getElementById("result").innerText = "";
+
+  interval = setInterval(() => {
+    x += 2;
+    y -= Math.random() * 2;
+
+    multiplier += 0.02;
+
+    document.getElementById("multi").innerText =
+      multiplier.toFixed(2) + "x";
+
+    drawLine();
+
+    ctx.font = "20px Arial";
+    ctx.fillText("✈️", x, y);
+
+    if (Math.random() < 0.02 || x > canvas.width) {
+      crash();
+    }
+
+  }, 50);
+}
+
+function crash() {
+  clearInterval(interval);
+  running = false;
+  document.getElementById("result").innerText = "💥 Crash!";
+}
+
+function cashOut() {
+  if (!running) return;
+
+  clearInterval(interval);
+  running = false;
+
+  let win = Math.floor(multiplier * 10);
+  coins += win;
+
+  updateCoins();
+
+  document.getElementById("result").innerText =
+    "✅ Cashed Out at " + multiplier.toFixed(2) + "x | +" + win;
+}
+
+function getCoins(){
+  // future mein yahan real ad lag sakta hai
+  coins += 50;
+  updateCoins();
+  alert("Ad dekha! +50 Coins");
+}
+</script>
+
+</body>
+</html>
